@@ -12,10 +12,23 @@
 	 http://www.springframework.org/schema/context/spring-context-3.1.xsd">
     <context:component-scan base-package="cn.itrip.auth.service"/>
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="commons.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql:///itripdb"/>
-        <property name="username" value="root"/>
-        <property name="password" value="zhouyuzhen"/>
+        <property name="driverClassName" value="${mysql.driver}"/>
+        <property name="url" value="${mysql.url}"/>
+        <property name="username" value="${mysql.user}"/>
+        <property name="password" value="${mysql.password}"/>
+        <property name="initialSize" value="${mysql.initialSize}"/>
+        <property name="maxActive" value="${mysql.maxActive}"/>
+        <property name="maxIdle" value="${mysql.maxIdle}"/>
+        <property name="minIdle" value="${mysql.minIdle}"/>
+        <property name="maxWait" value="${mysql.maxWait}"/>
+        <property name="removeAbandoned" value="${mysql.removeAbandoned}"/>
+        <property name="removeAbandonedTimeout" value="${mysql.removeAbandonedTimeout}"/>
+        <property name= "testWhileIdle" value="true"/>
+        <property name= "timeBetweenEvictionRunsMillis" value="60000"/>
+        <property name= "testOnBorrow" value="false"/>
+        <property name= "testOnReturn" value="false"/>
+        <property name= "validationQuery" value="select 1"/>
+        <property name= "numTestsPerEvictionRun" value="${mysql.maxActive}"/>
     </bean>
 
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
