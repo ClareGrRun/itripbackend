@@ -21,19 +21,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/api")
 public class TokenController {
-
+/*
 	@Resource
 	private TokenService tokenService;
-	/**
+	*//**
 	 * 置换token
 	 * 
 	 * @return 新的token信息
-	 */
+	 *//*
 	
 	@RequestMapping(value = "/retoken", method = RequestMethod.POST,produces= "application/json")
 	public @ResponseBody
 	Dto replace(HttpServletRequest request) {
-		/*
+		*//*
 		 * 请求格式 
 		 * $.ajax({
 				headers:{
@@ -45,7 +45,7 @@ public class TokenController {
 				.....
 				})
 		 * 
-		 */
+		 *//*
 		return null;
-	}
+	}*/
 }

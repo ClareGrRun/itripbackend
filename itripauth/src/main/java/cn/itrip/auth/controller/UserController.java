@@ -6,7 +6,11 @@ import javax.annotation.Resource;
 
 import cn.itrip.auth.service.UserService;
 import cn.itrip.beans.dto.Dto;
+import cn.itrip.beans.pojo.ItripUser;
 import cn.itrip.beans.vo.userinfo.ItripUserVO;
+import cn.itrip.common.DtoUtil;
+import cn.itrip.common.ErrorCode;
+import cn.itrip.common.MD5;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,8 +43,26 @@ public class UserController {
 	 */	
 	@RequestMapping(value="/doregister",method=RequestMethod.POST,produces = "application/json")
 	public @ResponseBody
-	Dto doRegister(@RequestBody ItripUserVO userVO) {
-		return null;
+	Dto doRegister(@RequestBody ItripUserVO userVO){
+		//1.验证邮箱
+		if(!validEmail(userVO.getUserCode())){
+			return DtoUtil.returnFail("请输入正确的邮箱!", ErrorCode.AUTH_ILLEGAL_USERCODE);
+		}
+		ItripUser user = new ItripUser();
+		user.setUserCode(userVO.getUserCode());
+		user.setUserName(userVO.getUserName());
+		try {
+		if(null!=userService.findUserByUserCode(user.getUserCode())){
+			return DtoUtil.returnFail("用户名已存在",ErrorCode.AUTH_USER_ALREADY_EXISTS);
+		}else{
+				user.setUserPassword(MD5.getMd5(userVO.getUserPassword(),32));
+				userService.insertItripUser(user);
+				return DtoUtil.returnSuccess();
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			return DtoUtil.returnFail(e.getMessage(),ErrorCode.AUTH_UNKNOWN);
+		}
 	}
 	
 	/**
@@ -64,17 +86,36 @@ public class UserController {
 	Dto checkUser(@RequestParam String name) {
 		return null;
 	}
-	
-	
+
+	/**
+	 * 邮箱激活
+	 * @param user
+	 * @param code
+	 * @return
+	 */
 	@RequestMapping(value="/activate",method=RequestMethod.PUT,produces= "application/json")
 	public @ResponseBody Dto activate(			
 			@RequestParam String user,			
 			@RequestParam String code){
-		return null;
+		try {
+			if(userService.activate(user,code)){
+				return DtoUtil.returnSuccess("激活成功");
+			}else{
+				return DtoUtil.returnSuccess("激活失败");
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			return  DtoUtil.returnFail("激活失败",ErrorCode.AUTH_UNKNOWN);
+		}
 			
-	} 
-	
-	
+	}
+
+	/**
+	 * 手机激活
+	 * @param user
+	 * @param code
+	 * @return
+	 */
 	@RequestMapping(value="/validatephone",method=RequestMethod.PUT,produces= "application/json")
 	public @ResponseBody Dto validatePhone(			
 			@RequestParam String user,			

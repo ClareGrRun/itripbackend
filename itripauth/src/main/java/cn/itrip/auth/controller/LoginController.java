@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/api")
 public class LoginController {
-
+/*
 	@Resource
 	private UserService userService;
 
@@ -37,10 +37,10 @@ public class LoginController {
 			HttpServletRequest request) {
 		return null;
 	}
-	
-	
+
+
 	@RequestMapping(value="/logout",method=RequestMethod.GET,produces="application/json",headers="token")
 	public @ResponseBody Dto logout(HttpServletRequest request){
 		return null;
-	}
+	}*/
 }

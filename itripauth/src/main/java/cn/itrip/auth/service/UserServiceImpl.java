@@ -1,21 +1,72 @@
 package cn.itrip.auth.service;
 
 import cn.itrip.beans.pojo.ItripUser;
+import cn.itrip.common.MD5;
+import cn.itrip.common.RedisAPI;
 import cn.itrip.dao.user.ItripUserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service("userService")
 @Transactional
 public class UserServiceImpl implements UserService{
     @Resource
     private ItripUserMapper itripUserMapper;
+    @Resource
+    private RedisAPI redisAPI;
+    @Resource
+    private MailService mailService;
+
 
 
     @Override
-    public Integer insertItripUser(ItripUser itripUser) throws Exception{
-        return itripUserMapper.insertItripUser(itripUser);
+    public void insertItripUser(ItripUser itripUser) throws Exception{
+        //添加用户
+        itripUserMapper.insertItripUser(itripUser);
+        //生成激活码
+        String activationCode = MD5.getMd5(new Date().toLocaleString(),32);
+        //发送邮件
+        mailService.sendActivationMail(itripUser.getUserCode(),activationCode);
+        //激活码存入redis
+        redisAPI.set("activation"+itripUser.getUserCode(),30*60,activationCode);
+    }
+
+    @Override
+    public boolean activate(String mail, String code) throws Exception {
+        String value = redisAPI.get("activation" + mail);
+        if(value.equals(code)){
+            Map<String ,Object> map = new HashMap<>();
+            map.put("userCode",mail);
+            List<ItripUser> users = itripUserMapper.getItripUserListByMap(map);
+            if(users.size()>0){
+                ItripUser user = users.get(0);
+                user.setActivated(1);
+                user.setUserType(0);
+                user.setFlatID(user.getId());
+                itripUserMapper.updateItripUser(user);
+                return  true;
+            }
+        }else {
+            return false;
+        }
+        return  false;
+    }
+
+    @Override
+    public ItripUser findUserByUserCode(String userCode) throws Exception {
+        Map<String ,Object> map = new HashMap<>();
+        map.put("userCode",userCode);
+        List<ItripUser> users = itripUserMapper.getItripUserListByMap(map);
+        if(users.size()>0){
+            return users.get(0);
+        }else{
+            return null;
+        }
     }
 }

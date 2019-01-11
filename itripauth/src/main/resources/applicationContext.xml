@@ -10,7 +10,9 @@
 	 http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
 	 http://www.springframework.org/schema/context
 	 http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+    <import resource="applicationContext-mail.xml"/>
     <context:component-scan base-package="cn.itrip.auth.service"/>
+    <context:property-placeholder location="classpath:database.properties,classpath:sms.properties"/>
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${mysql.driver}"/>
         <property name="url" value="${mysql.url}"/>
@@ -48,5 +50,28 @@
 
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="cn.itrip.dao"/>
+    </bean>
+
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property  name="maxActive"  value="${redis.maxActive}" />
+        <property  name="maxIdle"   value="${redis.maxIdle}" />
+        <property  name="maxWait"  value="${redis.maxWait}" />
+        <property  name="testOnBorrow"  value="true" />
+    </bean>
+    <!-- Config poolConfig, String host, int port, int timeout, String password, int database-->
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool" destroy-method="destroy" >
+        <constructor-arg ref="jedisPoolConfig"/>
+        <constructor-arg value="${redis.host}"/>
+        <constructor-arg value="${redis.port}"/>
+        <constructor-arg value="${redis.timeout}"/>
+        <constructor-arg value="${redis.pass}"/>
+        <constructor-arg value="${redis.default.db}"/>
+    </bean>
+    <bean id="redisAPI" class="cn.itrip.common.RedisAPI">
+        <property name="jedisPool" ref="jedisPool"/>
+    </bean>
+
+    <bean id="validationToken" class="cn.itrip.common.ValidationToken">
+        <property name="redisAPI" ref="redisAPI" />
     </bean>
 </beans>
