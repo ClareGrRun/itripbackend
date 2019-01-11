@@ -11,6 +11,12 @@ import cn.itrip.beans.vo.userinfo.ItripUserVO;
 import cn.itrip.common.DtoUtil;
 import cn.itrip.common.ErrorCode;
 import cn.itrip.common.MD5;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.models.Model;
+import io.swagger.models.Scheme;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,13 +30,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author hduser
  *
  */
+@Api
 @Controller
 @RequestMapping(value = "/api")
 public class UserController {
 	@Resource
 	private UserService userService;
-	
-	
+
+
 	@RequestMapping("/register")
 	public String showRegisterForm() {
 		return "register";
@@ -40,7 +47,9 @@ public class UserController {
 	 * 使用邮箱注册 
 	 * @param userVO
 	 * @return
-	 */	
+	 */
+	@ApiOperation(value = "使用邮箱注册",notes = "使用邮箱注册",httpMethod = "POST")
+	@ApiImplicitParam(name = "userVO", value = "用户实体", required = true,dataType = "Model",paramType = "body")
 	@RequestMapping(value="/doregister",method=RequestMethod.POST,produces = "application/json")
 	public @ResponseBody
 	Dto doRegister(@RequestBody ItripUserVO userVO){
@@ -69,7 +78,9 @@ public class UserController {
 	 * 使用手机注册
 	 * @param userVO
 	 * @return
-	 */	
+	 */
+	@ApiOperation(value = "使用手机注册",notes = "使用手机注册",httpMethod = "POST")
+	@ApiImplicitParam(name = "userVo",value = "用户实体",required = true,dataType = "Model",paramType = "body")
 	@RequestMapping(value="/registerbyphone",method=RequestMethod.POST,produces = "application/json")
 	public @ResponseBody Dto registerByPhone(			
 			@RequestBody ItripUserVO userVO){
@@ -97,7 +108,9 @@ public class UserController {
 	 * 检查用户是否已注册
 	 * @param name
 	 * @return
-	 */	
+	 */
+	@ApiOperation(value = "用户名验证",notes = "验证是否已存在改用户名",httpMethod = "GET")
+	@ApiImplicitParam(name = "name",value = "被检查的用户",required = true,dataType = "string",paramType = "query")
 	@RequestMapping(value="/ckusr",method=RequestMethod.GET,produces= "application/json")
 	public @ResponseBody
 	Dto checkUser(@RequestParam String name) {
@@ -119,6 +132,11 @@ public class UserController {
 	 * @param code
 	 * @return
 	 */
+	@ApiOperation(value = "邮箱注册用户激活",notes = "邮箱激活",httpMethod = "PUT")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "user",value = "注册邮箱地址",required = true,dataType = "string",paramType = "query"),
+		@ApiImplicitParam(name = "code",value = "激活码",required = true,dataType = "string",paramType = "query")
+	})
 	@RequestMapping(value="/activate",method=RequestMethod.PUT,produces= "application/json")
 	public @ResponseBody Dto activate(			
 			@RequestParam String user,			
@@ -142,6 +160,11 @@ public class UserController {
 	 * @param code
 	 * @return
 	 */
+	@ApiOperation(value = "手机注册用户激活",notes = "邮箱激活",httpMethod = "PUT")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "user",value = "注册手机",required = true,dataType = "string",paramType = "query"),
+			@ApiImplicitParam(name = "code",value = "激活码",required = true,dataType = "string",paramType = "query")
+	})
 	@RequestMapping(value="/validatephone",method=RequestMethod.PUT,produces= "application/json")
 	public @ResponseBody Dto validatePhone(			
 			@RequestParam String user,			

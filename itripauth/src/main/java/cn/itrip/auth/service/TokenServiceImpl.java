@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 @Service("tokenService")
@@ -60,5 +61,24 @@ public class TokenServiceImpl implements TokenService{
     @Override
     public void delete(String token) throws Exception {
         redisAPI.delete(token);
+    }
+
+    private long protectdTime=30*60;
+    @Override
+    public String reloadToken(String userAgent, String token) throws Exception {
+        if(!redisAPI.exist(token)){
+            throw new Exception("token无效");
+        }
+        Date genTime = new SimpleDateFormat("yyyyMMddHHmmss").parse(token.split("-")[3]);
+        long passed = Calendar.getInstance().getTimeInMillis()-genTime.getTime();
+        if(passed<protectdTime*1000){
+            throw  new Exception("token置换保护期内，不能操作，剩余"+(protectdTime*1000-passed)/1000);
+        }
+        String user = redisAPI.get(token);
+        ItripUser itripUser = JSON.parseObject(user,ItripUser.class);
+        String newToken = this.generateToken(userAgent,itripUser);
+        redisAPI.set(token,2*60,user);
+        this.save(newToken,itripUser);
+        return  newToken;
     }
 }

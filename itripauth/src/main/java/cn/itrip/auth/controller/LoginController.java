@@ -12,11 +12,16 @@ import cn.itrip.common.DtoUtil;
 import cn.itrip.common.EmptyUtils;
 import cn.itrip.common.ErrorCode;
 import cn.itrip.common.MD5;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import sun.security.util.Password;
 
 import java.util.Calendar;
 
@@ -25,6 +30,7 @@ import java.util.Calendar;
  * @author hduser
  *
  */
+@Api
 @Controller
 @RequestMapping(value = "/api")
 public class LoginController {
@@ -34,6 +40,11 @@ public class LoginController {
 	@Resource
 	private TokenService tokenService;
 
+	@ApiOperation(value = "登录",notes = "根据用户名、密码进行统一认证",httpMethod = "POST",response = ItripUser.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "name", value = "用户名", required = true, dataType = "String", paramType = "form"),
+			@ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "String", paramType = "form")
+	})
 	@RequestMapping(value="/dologin",method=RequestMethod.POST,produces= "application/json")
 	public @ResponseBody
 	Dto dologin(
@@ -59,6 +70,8 @@ public class LoginController {
         }
 	}
 
+	@ApiOperation(value = "注销",notes = "客户端需在header中发送token",httpMethod = "GET")
+	@ApiImplicitParam(name = "token", value = "令牌", required = true, dataType = "String", paramType = "header")
 	@RequestMapping(value="/logout",method=RequestMethod.GET,produces="application/json",headers="token")
 	public @ResponseBody Dto logout(HttpServletRequest request){
 		String token = request.getHeader("token");
