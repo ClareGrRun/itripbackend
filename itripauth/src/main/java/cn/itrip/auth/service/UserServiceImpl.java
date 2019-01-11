@@ -22,11 +22,17 @@ public class UserServiceImpl implements UserService{
     private RedisAPI redisAPI;
     @Resource
     private MailService mailService;
+    @Resource
+    private SmsService smsService;
 
 
-
+    /**
+     * 邮箱注册
+     * @param itripUser
+     * @throws Exception
+     */
     @Override
-    public void insertItripUser(ItripUser itripUser) throws Exception{
+    public void itripxCreateUserByMail(ItripUser itripUser) throws Exception{
         //添加用户
         itripUserMapper.insertItripUser(itripUser);
         //生成激活码
@@ -37,6 +43,25 @@ public class UserServiceImpl implements UserService{
         redisAPI.set("activation"+itripUser.getUserCode(),30*60,activationCode);
     }
 
+    /**
+     * 手机注册
+     * @param itripUser
+     * @throws Exception
+     */
+    public void itripxCreateUserByPhone(ItripUser itripUser) throws Exception {
+        itripUserMapper.insertItripUser(itripUser);
+        int code = MD5.getRandomCode();
+        smsService.send(itripUser.getUserCode(),"1",new String[]{String.valueOf(code),"1"});
+        redisAPI.set("activation"+itripUser.getUserCode(),2*60,String.valueOf(code));
+    }
+
+    /**
+     * 邮箱激活
+     * @param mail
+     * @param code
+     * @return
+     * @throws Exception
+     */
     @Override
     public boolean activate(String mail, String code) throws Exception {
         String value = redisAPI.get("activation" + mail);
@@ -58,6 +83,38 @@ public class UserServiceImpl implements UserService{
         return  false;
     }
 
+    /**
+     * 手机激活
+     * @param phoneNum
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    public boolean validatePhone(String phoneNum,String code)throws  Exception{
+        String value = redisAPI.get("activation"+phoneNum);
+        if(null!=value&&value.equals(code)){
+            Map<String,Object> map = new HashMap<>();
+            map.put("userCode",phoneNum);
+            List<ItripUser> users = itripUserMapper.getItripUserListByMap(map);
+            if(users.size()>0){
+                ItripUser user = users.get(0);
+                user.setActivated(1);
+                user.setUserType(0);
+                user.setFlatID(user.getId());
+                itripUserMapper.updateItripUser(user);
+                return  true;
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+    /**
+     * 重名验证
+     * @param userCode
+     * @return
+     * @throws Exception
+     */
     @Override
     public ItripUser findUserByUserCode(String userCode) throws Exception {
         Map<String ,Object> map = new HashMap<>();

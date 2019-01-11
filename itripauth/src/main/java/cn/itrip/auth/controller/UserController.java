@@ -56,7 +56,7 @@ public class UserController {
 			return DtoUtil.returnFail("用户名已存在",ErrorCode.AUTH_USER_ALREADY_EXISTS);
 		}else{
 				user.setUserPassword(MD5.getMd5(userVO.getUserPassword(),32));
-				userService.insertItripUser(user);
+				userService.itripxCreateUserByMail(user);
 				return DtoUtil.returnSuccess();
 			}
 		}catch (Exception e){
@@ -73,7 +73,24 @@ public class UserController {
 	@RequestMapping(value="/registerbyphone",method=RequestMethod.POST,produces = "application/json")
 	public @ResponseBody Dto registerByPhone(			
 			@RequestBody ItripUserVO userVO){
-		return null;
+		if(!validPhone(userVO.getUserCode())){
+			return DtoUtil.returnFail("请输入正确的手机号码！",ErrorCode.AUTH_ILLEGAL_USERCODE);
+		}
+		ItripUser user  = new ItripUser();
+		user.setUserCode(userVO.getUserCode());
+		user.setUserName(userVO.getUserName());
+		try {
+			if(null!=userService.findUserByUserCode(user.getUserCode())){
+				return DtoUtil.returnFail("用户名已存在",ErrorCode.AUTH_USER_ALREADY_EXISTS);
+			}else{
+				user.setUserPassword(MD5.getMd5(userVO.getUserPassword(),32));
+				userService.itripxCreateUserByPhone(user);
+				return DtoUtil.returnSuccess();
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			return DtoUtil.returnFail(e.getMessage(),ErrorCode.AUTH_UNKNOWN);
+		}
 	}
 
 	/**
@@ -120,7 +137,16 @@ public class UserController {
 	public @ResponseBody Dto validatePhone(			
 			@RequestParam String user,			
 			@RequestParam String code){
-		return null;
+		try {
+			if(userService.validatePhone(user,code)){
+				return DtoUtil.returnSuccess("激活成功");
+			}else{
+				return DtoUtil.returnSuccess("激活失败");
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			return  DtoUtil.returnFail("激活失败",ErrorCode.AUTH_UNKNOWN);
+		}
 	} 
 	
 	
