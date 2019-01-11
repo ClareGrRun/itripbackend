@@ -235,4 +235,7 @@
     <delete id="deleteItripUserById" parameterType="Long">
         delete from itrip_user where id = #{id}
     </delete>
+    <select id="findUserByUserCode" resultType="cn.itrip.beans.pojo.ItripUser">
+        select * from itrip_user where userCode=#{userCode}
+    </select>
 </mapper>

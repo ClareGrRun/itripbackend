@@ -109,6 +109,19 @@ public class UserServiceImpl implements UserService{
         }
         return false;
     }
+
+    @Override
+    public ItripUser login(String userCode, String userPassword) throws Exception {
+        ItripUser user = itripUserMapper.findUserByUserCode(userCode);
+        if(null!=user&&user.getUserPassword().equals(userPassword)){
+            if(user.getActivated()!=1){
+                throw new Exception("用户未激活");
+            }
+            return user;
+        }
+        return null;
+    }
+
     /**
      * 重名验证
      * @param userCode

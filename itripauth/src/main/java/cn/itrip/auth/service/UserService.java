@@ -12,4 +12,6 @@ public interface UserService {
     public ItripUser findUserByUserCode(String userCode) throws  Exception;
 
     public boolean validatePhone(String phoneNum,String code)throws  Exception;
+
+    public ItripUser login(String userCode,String userPassword) throws Exception;
 }

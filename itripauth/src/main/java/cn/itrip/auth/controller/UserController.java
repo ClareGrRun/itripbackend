@@ -101,7 +101,16 @@ public class UserController {
 	@RequestMapping(value="/ckusr",method=RequestMethod.GET,produces= "application/json")
 	public @ResponseBody
 	Dto checkUser(@RequestParam String name) {
-		return null;
+		try {
+			if(null!=userService.findUserByUserCode(name)){
+				return DtoUtil.returnFail("用户名已存在!",ErrorCode.AUTH_USER_ALREADY_EXISTS);
+			}else{
+				return DtoUtil.returnSuccess("用户名可用!");
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			return DtoUtil.returnFail(e.getMessage(),ErrorCode.AUTH_UNKNOWN);
+		}
 	}
 
 	/**
