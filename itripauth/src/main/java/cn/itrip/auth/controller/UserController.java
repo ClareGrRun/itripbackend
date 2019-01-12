@@ -49,7 +49,6 @@ public class UserController {
 	 * @return
 	 */
 	@ApiOperation(value = "使用邮箱注册",notes = "使用邮箱注册",httpMethod = "POST")
-	@ApiImplicitParam(name = "userVO", value = "用户实体", required = true,dataType = "Model",paramType = "body")
 	@RequestMapping(value="/doregister",method=RequestMethod.POST,produces = "application/json")
 	public @ResponseBody
 	Dto doRegister(@RequestBody ItripUserVO userVO){
@@ -80,7 +79,6 @@ public class UserController {
 	 * @return
 	 */
 	@ApiOperation(value = "使用手机注册",notes = "使用手机注册",httpMethod = "POST")
-	@ApiImplicitParam(name = "userVo",value = "用户实体",required = true,dataType = "Model",paramType = "body")
 	@RequestMapping(value="/registerbyphone",method=RequestMethod.POST,produces = "application/json")
 	public @ResponseBody Dto registerByPhone(			
 			@RequestBody ItripUserVO userVO){
